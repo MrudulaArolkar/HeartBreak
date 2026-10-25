@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Heartbreak Simulator 💔</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Cute Aesthetics -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastelPink: '#FFD1DC',
+                        pastelPurple: '#E2F0CB',
+                        pastelLilac: '#E6E6FA',
+                        pastelMint: '#BFFCC6',
+                        pastelRose: '#FFB7B2',
+                        pastelDarkPink: '#FF85A1',
+                        bubblegum: '#FF3366'
+                    },
+                    fontFamily: {
+                        display: ['"Fredoka One"', 'cursive'],
+                        sans: ['"Nunito"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffd1dc 0%, #e6e6fa 50%, #c7ceea 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Cute Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFE5EC;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF85A1;
+            border-radius: 10px;
+        }
+
+        /* Floating background sparkles */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            animation: floatSparkle 4s infinite ease-in-out;
+        }
+
+        @keyframes floatSparkle {
+            0%, 100% { transform: translateY(0) scale(0.8) rotate(0deg); opacity: 0.4; }
+            50% { transform: translateY(-20px) scale(1.1) rotate(180deg); opacity: 0.9; }
+        }
+
+        /* Screen Shake Effect */
+        .shake-hard {
+            animation: shakeHard 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shakeHard {
+            10%, 90% { transform: translate3d(-4px, 0, 0) rotate(-1deg); }
+            20%, 80% { transform: translate3d(6px, 0, 0) rotate(2deg); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0) rotate(-2deg); }
+            40%, 60% { transform: translate3d(8px, 0, 0) rotate(1deg); }
+        }
+
+        /* Rejected Stamp Animation */
+        .stamp-appear {
+            animation: stampIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes stampIn {
+            0% { opacity: 0; transform: scale(3) rotate(-15deg); }
+            100% { opacity: 0.9; transform: scale(1) rotate(-12deg); }
+        }
+
+        /* Kawaii Pulse */
+        .kawaii-pulse {
+            animation: kawaiiPulse 2s infinite;
+        }
+
+        @keyframes kawaiiPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Mascot Expressions CSS */
+        .mascot-eye {
+            transition: all 0.2s ease;
+        }
+
+        /* Heart shatter canvas positioning */
+        #heartCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Cute speech bubble tail */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between items-center p-4 relative select-none">
+
+    <!-- Heart Shatter Canvas Overlay -->
+    <canvas id="heartCanvas"></canvas>
+
+    <!-- Floating Background Decorative Sparkles & Hearts -->
+    <div id="sparkleContainer" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Header / Title -->
+    <header class="text-center mt-4 z-10">
+        <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md px-6 py-2 rounded-full shadow-md border-2 border-pink-300 mb-2">
+            <i class="fa-solid font-bold text-pink-500 text-xl fa-heart-crack animate-bounce"></i>
+            <span class="font-display text-pink-600 text-sm tracking-wider uppercase">Absolute Zero Romance Zone</span>
+            <i class="fa-solid font-bold text-pink-500 text-xl fa-heart-crack animate-bounce"></i>
+        </div>
+        <h1 class="font-display text-4xl sm:text-5xl md:text-6xl text-pink-600 drop-shadow-md tracking-wide">
+            The Heartbreak Simulator 💔
+        </h1>
+        <p class="text-purple-700 font-extrabold mt-1 text-sm sm:text-base">
+            Shoot your shot! We promise to obliterate your self-esteem in kawaii style ✨
+        </p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-2xl bg-white/85 backdrop-blur-lg rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-pink-200 z-10 my-6 relative transition-all duration-300" id="mainCard">
+        
+        <!-- Rejection Counter Badge -->
+        <div class="absolute -top-5 right-6 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-display px-4 py-2 rounded-2xl shadow-lg border-2 border-white flex items-center gap-2 text-sm sm:text-base transform rotate-3">
+            <i class="fa-solid fa-heart-crack"></i>
+            <span>Hearts Broken: <span id="counter" class="text-yellow-200 text-lg">0</span></span>
+        </div>
+
+        <!-- Mascot & Speech Bubble Section -->
+        <div class="flex flex-col items-center mb-6 relative">
+            
+            <!-- Speech Bubble / Response Container -->
+            <div id="responseBubble" class="speech-bubble relative w-full bg-white border-4 border-pink-300 rounded-2xl p-5 mb-6 text-center shadow-inner min-h-[120px] flex items-center justify-center transition-all duration-300">
+                
+                <!-- REJECTED Stamp Overlay -->
+                <div id="rejectedStamp" class="hidden absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                    <span class="stamp-appear text-red-600 font-display text-5xl sm:text-7xl border-8 border-red-600 px-6 py-1 rounded-xl tracking-widest uppercase opacity-90 shadow-2xl bg-white/70 backdrop-blur-xs">
+                        REJECTED!
+                    </span>
+                </div>
+
+                <!-- Response Text -->
+                <div id="responseTextContainer" class="w-full">
+                    <p id="responseText" class="font-display text-xl sm:text-2xl text-purple-800 leading-snug">
+                        "Go ahead, cutie! Give me your best flirt or proposal. I dare you! 🎀"
+                    </p>
+                    <p id="categoryBadge" class="hidden inline-block mt-3 bg-pink-100 text-pink-600 font-extrabold text-xs px-3 py-1 rounded-full uppercase border border-pink-300">
+                        Savage Category
+                    </p>
+                </div>
+            </div>
+
+            <!-- Cute Animated Mascot SVG -->
+            <div id="mascot" class="w-32 h-32 sm:w-40 sm:h-40 cursor-pointer transform hover:scale-105 transition-transform" onclick="triggerMascotGiggle()">
+                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-lg">
+                    <!-- Bunny Body -->
+                    <ellipse cx="100" cy="140" rx="60" ry="45" fill="#FFC6FF" />
+                    <!-- Left Ear -->
+                    <ellipse id="earLeft" cx="65" cy="50" rx="16" ry="45" fill="#FFC6FF" transform="rotate(-15 65 50)" />
+                    <ellipse cx="65" cy="50" rx="9" ry="30" fill="#FFADAD" transform="rotate(-15 65 50)" />
+                    <!-- Right Ear -->
+                    <ellipse id="earRight" cx="135" cy="50" rx="16" ry="45" fill="#FFC6FF" transform="rotate(15 135 50)" />
+                    <ellipse cx="135" cy="50" rx="9" ry="30" fill="#FFADAD" transform="rotate(15 135 50)" />
+                    <!-- Head -->
+                    <circle cx="100" cy="110" r="50" fill="#FFC6FF" />
+                    <!-- Cheeks -->
+                    <circle cx="70" cy="120" r="10" fill="#FFADAD" opacity="0.7" />
+                    <circle cx="130" cy="120" r="10" fill="#FFADAD" opacity="0.7" />
+                    
+                    <!-- DYNAMIC FACIAL FEATURES -->
+                    <!-- Eyes Group -->
+                    <g id="mascotEyes">
+                        <!-- Normal Happy Eyes -->
+                        <circle cx="75" cy="105" r="6" fill="#3A0CA3" class="eye-normal" />
+                        <circle cx="125" cy="105" r="6" fill="#3A0CA3" class="eye-normal" />
+                        <!-- Sparkles in eyes -->
+                        <circle cx="73" cy="103" r="2" fill="#FFFFFF" class="eye-normal" />
+                        <circle cx="123" cy="103" r="2" fill="#FFFFFF" class="eye-normal" />
+                    </g>
+                    
+                    <!-- Cool Sunglasses (Hidden by default, shown on savage reject) -->
+                    <g id="mascotShades" class="hidden">
+                        <path d="M 60 95 Q 100 95 140 95 L 135 115 Q 100 120 65 115 Z" fill="#2B2D42" />
+                        <line x1="55" y1="98" x2="145" y2="98" stroke="#2B2D42" stroke-width="4" stroke-linecap="round"/>
+                        <!-- Reflection -->
+                        <line x1="70" y1="100" x2="85" y2="110" stroke="#FFFFFF" stroke-width="2" opacity="0.6"/>
+                        <line x1="110" y1="100" x2="125" y2="110" stroke="#FFFFFF" stroke-width="2" opacity="0.6"/>
+                    </g>
+
+                    <!-- Nose -->
+                    <polygon points="96,115 104,115 100,120" fill="#FF006E" />
+                    
+                    <!-- Mouth -->
+                    <path id="mascotMouth" d="M 92 124 Q 100 130 108 124" stroke="#3A0CA3" stroke-width="3" fill="none" stroke-linecap="round" />
+                    
+                    <!-- Bowtie -->
+                    <polygon points="85,150 100,156 85,162" fill="#FF597B" />
+                    <polygon points="115,150 100,156 115,162" fill="#FF597B" />
+                    <circle cx="100" cy="156" r="4" fill="#C70039" />
+                </svg>
+            </div>
+            <p class="text-xs text-pink-400 font-bold mt-1">Meet Barnaby 🐰 (Professional Heartbreaker)</p>
+        </div>
+
+        <!-- Preset Flirt Chips / Quick Buttons -->
+        <div class="mb-4">
+            <p class="text-xs font-extrabold text-purple-600 mb-2 uppercase tracking-wider flex items-center gap-1">
+                <i class="fa-solid fa-bolt text-yellow-400"></i> Preset Pick-Up Lines (Click to load):
+            </p>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="setPreset('Will you marry me? 💍')" class="text-xs bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold py-1.5 px-3 rounded-full transition-colors border border-pink-300">
+                    "Will you marry me? 💍"
+                </button>
+                <button onclick="setPreset('Did it hurt when you fell from heaven? 😇')" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold py-1.5 px-3 rounded-full transition-colors border border-purple-300">
+                    "Fell from heaven? 😇"
+                </button>
+                <button onclick="setPreset('Are you a magician? Because whenever I look at you, everyone else disappears! ✨')" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold py-1.5 px-3 rounded-full transition-colors border border-blue-300">
+                    "Are you a magician? ✨"
+                </button>
+                <button onclick="setPreset('Are you tired? \'Cause you\'ve been running through my mind all day... 🏃')" class="text-xs bg-green-100 hover:bg-green-200 text-green-700 font-bold py-1.5 px-3 rounded-full transition-colors border border-green-300">
+                    "Running through my mind... 🏃"
+                </button>
+            </div>
+        </div>
+
+        <!-- Input Form Section -->
+        <form id="proposalForm" onsubmit="handleProposal(event)" class="space-y-4">
+            <div class="relative">
+                <textarea 
+                    id="proposalInput" 
+                    rows="3" 
+                    placeholder="Type your sweetest flirt or proposal here... (e.g. 'Can I get your number?')"
+                    class="w-full p-4 rounded-2xl border-3 border-pink-300 focus:border-pink-500 focus:ring-4 focus:ring-pink-200 outline-none resize-none text-gray-700 font-extrabold text-base shadow-inner transition-all"
+                    required></textarea>
+                <button 
+                    type="button" 
+                    onclick="clearInput()" 
+                    class="absolute top-3 right-3 text-gray-400 hover:text-pink-500 text-sm font-bold bg-gray-100 hover:bg-pink-100 w-6 h-6 rounded-full flex items-center justify-center transition-colors">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Main Submit Button -->
+            <button 
+                type="submit" 
+                id="submitBtn"
+                class="kawaii-pulse w-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-display text-xl py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl border-b-4 border-purple-800 active:translate-y-1 transform transition-all flex items-center justify-center gap-3">
+                <i class="fa-solid fa-paper-plane text-2xl"></i>
+                <span>SHOOT YOUR SHOT!</span>
+                <i class="fa-solid fa-heart-crack text-2xl"></i>
+            </button>
+        </form>
+
+        <!-- Secondary Action Buttons (Copy / Share) -->
+        <div id="actionButtons" class="mt-6 flex flex-wrap sm:flex-nowrap gap-3 opacity-50 pointer-events-none transition-opacity">
+            <button 
+                onclick="copyRejection()" 
+                class="w-1/2 bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold py-2.5 px-4 rounded-xl border-2 border-purple-300 transition-all flex items-center justify-center gap-2 text-sm">
+                <i class="fa-regular fa-copy"></i>
+                <span id="copyBtnText">Copy Rejection</span>
+            </button>
+            <button 
+                onclick="shareScore()" 
+                class="w-1/2 bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold py-2.5 px-4 rounded-xl border-2 border-pink-300 transition-all flex items-center justify-center gap-2 text-sm">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>Share Pain</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs font-bold text-pink-700 mb-2 z-10">
+        Made with 💔 and zero mercy • Guaranteed 100% Rejection Rate
+    </footer>
+
+    <!-- Audio Synth Sound Effects JS -->
+    <script>
+        /* ==========================================================================
+           AUDIO SYNTHESIZER (Web Audio API - No External Assets Needed)
+           ========================================================================== */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        // Play dramatic heart-breaking shatter sound
+        function playShatterSound() {
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            
+            // Low thud (Impact)
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+
+            // High frequency glass noise (Shatter)
+            const bufferSize = audioCtx.sampleRate * 0.2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.setValueAtTime(2500, now);
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.4, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+            noise.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+
+            noise.start(now);
+            noise.stop(now + 0.25);
+        }
+
+        // Play sad buzzer sound
+        function playBuzzerSound() {
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(130, now);
+            osc.frequency.setValueAtTime(110, now + 0.15);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.4);
+        }
+
+        /* ==========================================================================
+           REJECTION DATABASE (Categorized & Keyword Reactive)
+           ========================================================================== */
+        const REJECTION_DATABASE = {
+            marry: [
+                "My marriage counselor already told me to avoid decisions made out of extreme pity.",
+                "I’d rather marry a wet toaster and jump in the bath.",
+                "I checked my schedule for the rest of my life. I’m busy.",
+                "My lawyer has already drafted a prenuptial restraining order."
+            ],
+            heaven: [
+                "I fell from heaven? You look like you landed on your face on the way down.",
+                "If I fell from heaven, it was to get away from pickup lines like that.",
+                "Did it hurt when you fell from the sensible-decision tree?"
+            ],
+            magician: [
+                "Are you a magician? Because I want you to vanish forever.",
+                "Abra-cadabra, disappear from my sight!",
+                "The only trick here is how you managed to type that with a straight face."
+            ],
+            running: [
+                "I've been running through your mind? No wonder I feel exhausted and trapped in a desert.",
+                "I was running to find the nearest exit from this conversation.",
+                "I’d run a marathon in crocs just to get away from you."
+            ],
+            number: [
+                "Sure! My number is 1-800-NEVER-IN-YOUR-WILD-DREAMS.",
+                "My number is 911, which I'm calling right now for unwanted harassment.",
+                "I lost my number... can I have yours? So I can block it immediately?"
+            ],
+            love: [
+                "Love is in the air? Quick, put on a hazmat mask!",
+                "I love myself enough for the both of us, thanks.",
+                "The only thing I love in this scenario is my personal space."
+            ],
+            generic: [
+                { text: "I'd rather swig hot salsa through my nose than go out with you.", category: "🔥 Savage Reality Check" },
+                { text: "Even my Wi-Fi disconnects when you get this close.", category: "📶 Cringe Factor" },
+                { text: "Thank you for your application. Unfortunately, we are seeking candidates with actual charm.", category: "💼 Corporate Rejection" },
+                { text: "Error 404: Attraction Not Found. Please try again in another life.", category: "🤖 Technical Error" },
+                { text: "My dog looked at your text and threw up.", category: "🐶 Pet Judgment" },
+                { text: "I’m currently focusing on my relationship with silence and solitude.", category: "🧘 Existential Avoidance" },
+                { text: "The odds of us ending up together are lower than winning the lottery while getting struck by lightning inside a cave.", category: "🌌 Astronomical Odds" },
+                { text: "I would swipe left on you even if you were the last profile on Earth.", category: "📱 Tinder Tragedy" },
+                { text: "I’m allergic to desperation.", category: "🤧 Medical Condition" },
+                { text: "You have a face for radio and a personality for silent film.", category: "🎬 Classic Cutdown" },
+                { text: "I’d give you a chance, but I’m saving my standards for someone who exists outside a comedy skit.", category: "🎭 Drama Critique" }
+            ]
+        };
+
+        /* ==========================================================================
+           APPLICATION STATE & LOGIC
+           ========================================================================== */
+        let heartBreakCount = 0;
+        let lastRejectionText = "";
+
+        function setPreset(text) {
+            const input = document.getElementById('proposalInput');
+            input.value = text;
+            input.focus();
+        }
+
+        function clearInput() {
+            document.getElementById('proposalInput').value = '';
+        }
+
+        function handleProposal(event) {
+            event.preventDefault();
+            const input = document.getElementById('proposalInput').value.trim();
+            if (!input) return;
+
+            // Increment Counter
+            heartBreakCount++;
+            document.getElementById('counter').innerText = heartBreakCount;
+
+            // Determine Rejection Response
+            const rejection = generateRejection(input);
+            lastRejectionText = rejection.text;
+
+            // Trigger Visual Drama & Animations
+            displayRejection(rejection);
+            triggerScreenShake();
+            triggerHeartShatterEffect();
+            playShatterSound();
+            playBuzzerSound();
+
+            // Enable Action Buttons
+            const actionBtns = document.getElementById('actionButtons');
+            actionBtns.classList.remove('opacity-50', 'pointer-events-none');
+        }
+
+        function generateRejection(input) {
+            const lower = input.toLowerCase();
+
+            // Check for keywords
+            if (lower.includes('marry')) {
+                return { text: getRandomArrayItem(REJECTION_DATABASE.marry), category: "💍 Marital Denial" };
+            }
+            if (lower.includes('heaven') || lower.includes('angel')) {
+                return { text: getRandomArrayItem(REJECTION_DATABASE.heaven), category: "😇 Angelic Insult" };
+            }
+            if (lower.includes('magician') || lower.includes('magic')) {
+                return { text: getRandomArrayItem(REJECTION_DATABASE.magician), category: "🪄 Vanishing Act" };
+            }
+            if (lower.includes('run') || lower.includes('running') || lower.includes('mind')) {
+                return { text: getRandomArrayItem(REJECTION_DATABASE.running), category: "🏃 Cardio Avoidance" };
+            }
+            if (lower.includes('number') || lower.includes('digits') || lower.includes('phone')) {
+                return { text: getRandomArrayItem(REJECTION_DATABASE.number), category: "📞 Blocked Number" };
+            }
+            if (lower.includes('love')) {
+                return { text: getRandomArrayItem(REJECTION_DATABASE.love), category: "💔 Love Hazard" };
+            }
+
+            // Default to random generic rejection
+            return getRandomArrayItem(REJECTION_DATABASE.generic);
+        }
+
+        function getRandomArrayItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function displayRejection(rejection) {
+            const responseText = document.getElementById('responseText');
+            const categoryBadge = document.getElementById('categoryBadge');
+            const stamp = document.getElementById('rejectedStamp');
+            const mascotEyes = document.getElementById('mascotEyes');
+            const mascotShades = document.getElementById('mascotShades');
+            const mascotMouth = document.getElementById('mascotMouth');
+
+            // Reset Stamp animation
+            stamp.classList.add('hidden');
+            void stamp.offsetWidth; // trigger reflow
+            stamp.classList.remove('hidden');
+
+            // Set Text
+            responseText.innerText = `"${rejection.text}"`;
+            categoryBadge.innerText = rejection.category || "🔥 Brutal Savage";
+            categoryBadge.classList.remove('hidden');
+
+            // Mascot Expressions (Cold / Unimpressed / Sunglasses)
+            mascotEyes.classList.add('hidden');
+            mascotShades.classList.remove('hidden');
+            // Unimpressed straight mouth
+            mascotMouth.setAttribute('d', 'M 90 125 L 110 125');
+        }
+
+        function triggerMascotGiggle() {
+            const mascot = document.getElementById('mascot');
+            mascot.classList.add('animate-bounce');
+            setTimeout(() => {
+                mascot.classList.remove('animate-bounce');
+            }, 1000);
+        }
+
+        function triggerScreenShake() {
+            const mainCard = document.getElementById('mainCard');
+            mainCard.classList.remove('shake-hard');
+            void mainCard.offsetWidth; // trigger reflow
+            mainCard.classList.add('shake-hard');
+        }
+
+        /* ==========================================================================
+           CANVAS SHATTERED HEARTS PARTICLE SYSTEM
+           ========================================================================== */
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class HeartParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 18 + 10;
+                this.speedX = (Math.random() - 0.5) * 12;
+                this.speedY = Math.random() * -10 - 4;
+                this.gravity = 0.4;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 15;
+                this.opacity = 1;
+                this.color = ['#FF3366', '#FF0055', '#C70039', '#900C3F', '#3A0CA3'][Math.floor(Math.random() * 5)];
+                this.isShard = Math.random() > 0.4; // Broken shard vs small heart
+            }
+
+            update() {
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                this.opacity -= 0.015;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.globalAlpha = Math.max(this.opacity, 0);
+                ctx.fillStyle = this.color;
+
+                if (this.isShard) {
+                    // Draw sharp heart broken shard triangle
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size / 2);
+                    ctx.lineTo(this.size / 2, this.size / 2);
+                    ctx.lineTo(-this.size / 2, this.size / 3);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    // Draw broken mini heart
+                    ctx.beginPath();
+                    const topCurveHeight = this.size * 0.3;
+                    ctx.moveTo(0, topCurveHeight);
+                    // Left curve
+                    ctx.bezierCurveTo(
+                        -this.size / 2, -topCurveHeight,
+                        -this.size, this.size / 3,
+                        0, this.size
+                    );
+                    // Right curve
+                    ctx.bezierCurveTo(
+                        this.size, this.size / 3,
+                        this.size / 2, -topCurveHeight,
+                        0, topCurveHeight
+                    );
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        function triggerHeartShatterEffect() {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 3;
+
+            // Spawn 40 broken heart particles
+            for (let i = 0; i < 45; i++) {
+                particles.push(new HeartParticle(centerX, centerY));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].opacity <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        /* ==========================================================================
+           BACKGROUND FLOATING SPARKLES GENERATOR
+           ========================================================================== */
+        function createBackgroundSparkles() {
+            const container = document.getElementById('sparkleContainer');
+            const icons = ['✨', '💖', '💔', '🌸', '⚡', '❄️'];
+            for (let i = 0; i < 20; i++) {
+                const el = document.createElement('div');
+                el.className = 'sparkle text-lg sm:text-2xl';
+                el.innerText = icons[Math.floor(Math.random() * icons.length)];
+                el.style.left = `${Math.random() * 100}%`;
+                el.style.top = `${Math.random() * 100}%`;
+                el.style.animationDelay = `${Math.random() * 4}s`;
+                el.style.animationDuration = `${3 + Math.random() * 4}s`;
+                container.appendChild(el);
+            }
+        }
+        createBackgroundSparkles();
+
+        /* ==========================================================================
+           UTILITY FUNCTIONS (Copy & Share)
+           ========================================================================== */
+        function copyRejection() {
+            if (!lastRejectionText) return;
+            
+            // Clipboard copy fallbacks
+            const textToCopy = `I proposed and got brutalized by The Heartbreak Simulator: "${lastRejectionText}" 💔`;
+            
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            const copyBtnText = document.getElementById('copyBtnText');
+            copyBtnText.innerText = "Copied to Clipboard! ✨";
+            setTimeout(() => {
+                copyBtnText.innerText = "Copy Rejection";
+            }, 2000);
+        }
+
+        function shareScore() {
+            const shareText = `I have been rejected ${heartBreakCount} times on The Heartbreak Simulator! 💔 Can you beat my soul-crushing score?`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'The Heartbreak Simulator',
+                    text: shareText,
+                    url: window.location.href,
+                }).catch(() => {});
+            } else {
+                const tempInput = document.createElement('textarea');
+                tempInput.value = shareText;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+
+                alert(`Score Copied! Share it with your friends:\n"${shareText}"`);
+            }
+        }
+    </script>
+</body>
+</html>
